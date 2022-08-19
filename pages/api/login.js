@@ -30,6 +30,7 @@ app.post(async function(req, res) {
           username: replitUser.username,
           replitId: replitId,
           image: replitUser.image,
+          createdAt: new Date().getTime(),
           role: 'DEFAULT'
         })
         await createdUser.save()
