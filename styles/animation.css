@@ -1,0 +1,42 @@
+
+
+.fade-in-up {
+  animation: fade-in-up forwards;
+}
+
+.fade-in {
+  animation: fade-in forwards;
+}
+
+.timing-ease {
+  animation-timing-function: ease;
+}
+
+.anim-duration-1 {
+  animation-duration: 1s;
+}
+
+.anim-delay-1 {
+  animation-delay: 1s;
+}
+
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
