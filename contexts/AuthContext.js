@@ -4,18 +4,16 @@ import { useRouter } from 'next/router'
 const AuthContext = React.createContext()
 
 
-export function useAuth() {
-  return React.useContext(AuthContext)
-}
-
-
 export function useUser(config) {
-  const user = useAuth()
+  const user = React.useContext(AuthContext)
   const router = useRouter()
 
-  if(config.redirect) {
-
-  }
+  useEffect(() => {
+    if(!config.redirect) return
+    if(user?.unauthenticated) {
+      router.replace(config.redirect)
+    }
+  }, [user])
   return { user }
 }
 
@@ -24,37 +22,12 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState()
 
   useEffect(() => {
-    
+    fetch('/api/getAuth').then(res => res.json()).then(data => {
+      setUser(data || { unauthenticated: true })
+    })
   }, [])
 
-  async function replitLogin(event) {
-    event.preventDefault()
-    
-    window.addEventListener('message', authComplete);
-
-		var left = (screen.width / 2) - 175;
-		var top = (screen.height / 2) - 250;
-
-    var authWindow = window.open(
-      'https://repl.it/auth_with_repl_site?domain='+location.host,
-      '_blank',
-      'modal =yes, toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=no, resizable=no, copyhistory=no, width=350, height=500, top='+top+', left='+left)
-
-    function authComplete(e) {
-      if (e.data !== 'auth_complete') {
-        return;
-      }
-
-      window.removeEventListener('message', authComplete);
-
-      authWindow.close();
-      fetch('/api/login', { method: "POST" }).then(res => {
-        if(res.status === 200) {
-          router.push('/browse')
-        }
-      })
-    }
-  }
+ 
 
   return (
     <AuthContext.Provider value={user}>
