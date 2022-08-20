@@ -3,7 +3,7 @@ import { SearchIcon } from "@heroicons/react/outline"
 import VoteCard from "../components/VoteCard"
 import SortBy from "../components/SortBy"
 
-export default function Browse() {
+export default function Browse({ user }) {
   const [browseType, setBrowseType] = useState("Official")
   const [filters, setFilters] = useState([])
 

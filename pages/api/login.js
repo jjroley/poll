@@ -1,21 +1,20 @@
-import { Gql } from '../../scripts/replitGql'
 import { User } from '../../scripts/schema'
+import Gql from '../../scripts/replitGql'
 
-const replitGql = Gql
+const replitGql = new Gql()
 
-import nextConnect from 'next-connect'
-
-const app = nextConnect()
-
-app.post(async function(req, res) {
+export default async function handler(req, res) {
   const replitId = req.headers['x-replit-user-id']
 
+  if(!replitId) {
+    return res.status(403).json(false)
+  }
+
   const replitData = await replitGql.raw({
-    query: `query user($id: Int!) {
-      user(id: $id) {
-        username image id
-      }
-    }
+    query: `
+      query user($id Int!) {
+        username image bio
+      }    
     `,
     variables: {
       id: Number(replitId)
@@ -24,18 +23,23 @@ app.post(async function(req, res) {
 
   if(replitData.data) {
     const replitUser = replitData.data.user
-    User.findOne({ replitId }, async function(err) {
-      if(err) {
-        const createdUser = new User({
-          username: replitUser.username,
-          replitId: replitId,
-          image: replitUser.image,
-          createdAt: new Date().getTime(),
-          role: 'DEFAULT'
-        })
-        await createdUser.save()
-      } 
-      res.status(200).json({ message: 'Success' })
-    })
+    const userExists = await User.findOne({ replitId })
+    if(!userExists) {
+      const newUser = new User({
+        username: replitUser.username,
+        replitId: replitId,
+        createdAt: new Date().getTime(),
+        role: "DEFAULT"
+      })
+      await newUser.save()
+    }
+    const user = {
+      name: replitUser.username,
+      id: replitUser.id,
+      image: replitUser.image
+    }
+    req.session.user = user
+    await res.session.save()
+    res.status(200).json(user)
   }
-})
+}

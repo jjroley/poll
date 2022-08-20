@@ -5,7 +5,6 @@ mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true })
 const userSchema = new Schema({
   replitId: String,
   username: String,
-  image: String,
   createdAt: Date,
   role: String
 })

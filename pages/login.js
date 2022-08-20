@@ -1,11 +1,9 @@
 import { useRouter } from "next/router";
-import { useState } from "react"
- 
+
 export default function Login() {
-  const [error, setError] = useState()
   const router = useRouter()
 
-  function replitLogin(event) {
+ const replitLogin = (event) => {
     event.preventDefault()
     
     window.addEventListener('message', authComplete);
@@ -25,12 +23,13 @@ export default function Login() {
 
       window.removeEventListener('message', authComplete);
 
-      authWindow.close();
-      fetch('/api/login', { method: "POST" }).then(res => {
+      fetch('/api/login').then(res => {
         if(res.status === 200) {
           router.push('/browse')
         }
       })
+      
+      authWindow.close();
     }
   }
 
@@ -43,3 +42,13 @@ export default function Login() {
     </div>
   )
 }
+
+// export function getServerSideProps(ctx) {
+//   const props = authProps(ctx)
+//   if(!props.user) {
+//     return {
+//       redirect: { to: '/' }
+//     }
+//   }
+//   return { props }
+// }

@@ -21,4 +21,4 @@ class Gql {
     }).then(r => r.json())
   }
 }
-module.exports = Gql;
+export default Gql;
