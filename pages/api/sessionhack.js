@@ -1,4 +1,5 @@
 import { withIronSessionApiRoute } from 'iron-session/next'
+import { sessionOptions } from '../../lib/sessionOptions'
 
 export default withIronSessionApiRoute(
   async (req, res) => {
@@ -10,11 +11,5 @@ export default withIronSessionApiRoute(
     await req.session.save()
     res.json({ ok: true })
   },
-  {
-    cookieName: 'connect.sid',
-    password: process.env.SESSION_PASSWORD,
-    cookieOptions: {
-      secure: process.env.NODE_ENV = 'production'
-    }
-  }
+  sessionOptions
 )

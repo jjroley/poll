@@ -1,5 +1,8 @@
+import { withIronSessionApiRoute } from "iron-session/next"
+import { sessionOptions } from '../../lib/sessionOptions'
 
-export default function handler(req, res) {
+function user(req, res) {
+  console.log(req.session)
   if(req.session.user) {
     res.json({
       ...req.session.user,
@@ -11,3 +14,5 @@ export default function handler(req, res) {
     })
   }
 }
+
+export default withIronSessionApiRoute(user, sessionOptions)
