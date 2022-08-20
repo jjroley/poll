@@ -1,6 +1,7 @@
 import { CheckCircleIcon } from '@heroicons/react/outline'
 import React, { useState, useEffect } from 'react'
 import ChartComponent from "../../components/Chart"
+import { Poll, User } from '../../scripts/schema'
 
 const data = {
   title: "What is you favorite online coding platform?",
@@ -26,12 +27,9 @@ const pct = data.options.map(() => {
   return num
 }) 
 
-// var d =  Object.values(data.votes.reduce((a, b) => {
-//   var pick = b.pick.toLowerCase()
-//   return {...a, [pick]: a[pick] + 1 }
-// }, optionsObj))
 
-export default function PollPage() {
+
+export default function PollPage({ pollData, loggedIn }) {
   const [chartData, setChartData] = useState()
   const [selected, setSelected] = useState()
 
@@ -43,6 +41,12 @@ export default function PollPage() {
         data: pct
     })
   }, [])
+
+  if(!pollData) {
+    return (
+      "Sorry, no poll data"
+    )
+  }
 
   return (
     <React.Fragment>
@@ -86,9 +90,25 @@ export default function PollPage() {
   )
 }
 
-export function getServerSideProps(ctx) {
-  console.log(ctx)
+export async function getServerSideProps(context) {
+  const { req, params: { id } } = context
+  let pollData = null;
+  Poll.findById(id, async function(err, poll) {
+    if(err) {
+      return console.error(err)
+    }
+    const user = await User.findOne({ replitId: poll.createdBy })
+    pollData = {
+      title: poll.title,
+      votes: poll.votes,
+      options: poll.options,
+      author: user.username
+    }
+  })
   return {
-    props: {}
+    props: { 
+      loggedIn: Boolean(req.headers['x-replit-user-id']),
+      pollData: pollData
+    }
   }
 }

@@ -1,9 +1,10 @@
-import { useRouter } from "next/router";
+import { User } from '../scripts/schema'
+import Router from 'next/router'
 
 export default function Login() {
-  const router = useRouter()
+  const [loading, setLoading] = useState(false)
 
- const replitLogin = (event) => {
+  const replitLogin = (event) => {
     event.preventDefault()
     
     window.addEventListener('message', authComplete);
@@ -23,9 +24,10 @@ export default function Login() {
 
       window.removeEventListener('message', authComplete);
 
-      fetch('/api/login').then(res => {
+      fetch('/api/login')
+      .then(res => {
         if(res.status === 200) {
-          router.push('/browse')
+          Router.push('/browse')
         }
       })
       
@@ -37,18 +39,19 @@ export default function Login() {
     <div className='container mx-auto'>
       <h1 className='text-4xl text-center font-bold my-10'>Login</h1>
       <form onSubmit={replitLogin} className='w-full flex justify-center'>
-        <button type='submit' className='font-[300] text-center px-4 py-2 bg-sky-600 text-white rounded-md shadow-md shadow-sky-200 transition-all hover:shadow-xl flex items-center'>Login with <img src='replit.svg' width='100px' className='inline'/></button>
+        <button disabled={loading} type='submit' className='font-[300] text-center px-4 py-2 bg-sky-600 text-white rounded-md shadow-md shadow-sky-200 transition-all hover:shadow-xl flex items-center disabled:bg-slate-200'>Login with <img src='replit.svg' width='100px' className='inline'/></button>
       </form>
     </div>
   )
 }
 
-// export function getServerSideProps(ctx) {
-//   const props = authProps(ctx)
-//   if(!props.user) {
-//     return {
-//       redirect: { to: '/' }
-//     }
-//   }
-//   return { props }
-// }
+export async function getServerSideProps({ req, res }) {
+  const replitId = req.headers['x-replit-user-id']
+  const user = await User.findOne({ replitId })
+  if(user) {
+    return {
+      redirect: { destination: '/' }
+    }
+  }
+  
+}

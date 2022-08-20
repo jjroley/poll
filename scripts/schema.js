@@ -16,6 +16,7 @@ const pollSchema = new Schema({
     official: Boolean,
     votes: [{ uid: String, date: String, pick: String }],
     options: [ String ],
+    createdBy: String,
     createdAt: Date
 })
 

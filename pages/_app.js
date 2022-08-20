@@ -5,7 +5,6 @@ import Header from '../components/Header'
 import React from 'react'
 import NextNProgress from 'nextjs-progressbar'
 
-
 function MyApp({ Component, pageProps }) {
   return (
     <div className='layout'>

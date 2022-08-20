@@ -115,3 +115,16 @@ export default function NewPoll() {
     </div>
   )
 }
+
+export function getServerSideProps({ req }) {
+  if(!req.headers['x-replit-user-id']) {
+    return {
+      redirect: { destination: '/login' }
+    }
+  }
+  return {
+    props: {
+      user: { id: req.headers['x-replit-user-id'] }
+    }
+  }
+}
