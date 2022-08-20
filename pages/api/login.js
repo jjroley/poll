@@ -1,9 +1,10 @@
 import { User } from '../../scripts/schema'
 import Gql from '../../scripts/replitGql'
+import { withIronSessionApiRoute } from 'iron-session/next'
 
 const replitGql = new Gql()
 
-export default async function handler(req, res) {
+async function login(req, res) {
   const replitId = req.headers['x-replit-user-id']
 
   if(!replitId) {
@@ -39,7 +40,15 @@ export default async function handler(req, res) {
       image: replitUser.image
     }
     req.session.user = user
-    await res.session.save()
+    await req.session.save()
     res.status(200).json(user)
   }
 }
+
+export default withIronSessionApiRoute(login, {
+  cookieName: 'connect.sid',
+  password: process.env.SESSION_PASSWORD,
+  cookieOptions: {
+    secure: process.env.NODE_ENV === 'production'
+  }
+})
