@@ -1,77 +1,110 @@
-import { CheckCircleIcon } from '@heroicons/react/outline'
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import ChartComponent from "../../components/Chart"
-import { Poll, User } from '../../scripts/schema'
+import { useRouter } from 'next/router'
+import useUser from '../../lib/useUser'
+import Link from 'next/link'
 
-const data = {
-  title: "What is you favorite online coding platform?",
-  votes: [
-    { uid: 1, pick: 'replit', date: Date.now() },
-    { uid: 1, pick: 'replit', date: Date.now() },
-    { uid: 1, pick: 'replit', date: Date.now() },
-    { uid: 1, pick: 'replit', date: Date.now() },
-    { uid: 2, pick: 'codepen', date: Date.now() },
-    { uid: 2, pick: 'codesandbox', date: Date.now() },
-    { uid: 2, pick: 'jsfiddle', date: Date.now() },
-    { uid: 3, pick: 'Cloud9', date: Date.now() }
-  ],
-  options: ['Replit','Codepen','jsfiddle','CodeSandbox','StackBlitz','Cloud9','Other'],
-  author: 'jjroley'
-}
+export default function PollPage() {
+  const { user } = useUser()
+  const router = useRouter()
+  const pollId = router.query.id
+  const [poll, setPoll] = useState()
+  const [loading, setLoading] = useState(true)
+  const [selected, setSelected] = useState(null)
+  const [voted, setVoted] = useState(false)
 
-
-var a = 100
-const pct = data.options.map(() => {
-  var num = Math.round(Math.random() * Math.min(50, a))
-  a -= num
-  return num
-}) 
-
-
-
-export default function PollPage({ pollData, loggedIn }) {
-  const [chartData, setChartData] = useState()
-  const [selected, setSelected] = useState()
-
-  useEffect(() => {
-    const optionsObj = data.options.reduce((a, b) => ({ ...a, [b.toLowerCase()]: 0 }), {})
-    setChartData({
-        labels: data.options,
-        label: data.title,
-        data: pct
+  const castVote = async () => {
+    if(!selected) return
+    const data = await fetch('/api/vote', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        pollId: pollId,
+        vote: selected
+      })
+    }).then(res => {
+      if(res.status === 201) {
+        setVoted(selected)
+      }
     })
-  }, [])
+  }
 
-  if(!pollData) {
+  const getDataForChart = useCallback(() => {
+    if(!poll) return
+    const options = poll.options
+    const obj = {}
+    options.forEach(o => {
+      obj[o] = 0
+    })
+    poll.votes.forEach(v => {
+      obj[v[0]]++
+    })
+    
+    return {
+      title: poll.title,
+      labels: poll.options,
+      data: Object.values(obj)
+    }
+  }, [poll])
+  
+  useEffect(() => {
+    if(!pollId || !user) return
+    fetch(`/api/poll?id=${pollId}`)
+    .then(res => {
+      if(res.status === 404) {
+        return
+      }  
+      return res.json()
+    })
+    .then(data => {      
+      setLoading(false)
+      setPoll(data)
+      const alreadyVoted = data.votes.find(v => v[1] === user.id)
+      setVoted(alreadyVoted)
+      setSelected(alreadyVoted ? alreadyVoted[0] : false)
+    })
+  }, [pollId, user])
+
+  if(loading) {
+    return "loading..."
+  }
+
+  if(!poll) {
     return (
-      "Sorry, no poll data"
+      "Sorry, poll doesn't exist"
     )
   }
 
   return (
-    <React.Fragment>
+    <>
       <div className='container mx-auto p-3 md:p-0'>
-        <h1 className='text-2xl font-bold mt-10'>{data.title}</h1>
-        <p className='text-lg font-extralight mb-10'>{data.author}</p>
+        <h1 className='text-2xl font-bold mt-10'>{poll.title}</h1>
+        <p className='text-lg font-extralight mb-10'>{poll.createdBy}</p>
         <div className='flex flex-col md:flex-row'>
           {
             /* 229, 192, 127 */
-            chartData && 
-            <React.Fragment>
+            user.loggedIn ? 
+            <>
               <div className='w-full md:w-2/3 max-w-[700px]'>
-                <ChartComponent data={chartData} />
+                {
+                  poll.votes.length ?
+                  <ChartComponent data={getDataForChart(poll)}/> :
+                  <div>No votes yet</div>
+                }
               </div>
               <div className='grow relative rounded-md flex flex-col'>
                 <div className='font-bold text-2xl m-2'>Cast your vote</div>
                 <div className='flex flex-wrap mb-2'>
                   {
-                    data.options.map(option => {
+                    poll.options.map(option => {
                       const isSelected = selected === option
                       return (
                         <div 
                           key={option} 
                           className={`flex items-center gap-1 px-3 py-2 m-1 font-thin rounded-md border border-sky-800 ${ isSelected ? 'bg-green-500 shadow-green-300 text-white border-transparent' : 'bg-sky-800 text-white hover:bg-white hover:text-black' } transition-all shadow-lg  cursor-pointer`}
-                          onClick={() => setSelected(option)}
+                          onClick={() => !voted && setSelected(option)}
                         >
                           {option}
                         </div>
@@ -79,36 +112,19 @@ export default function PollPage({ pollData, loggedIn }) {
                     })
                   }
                 </div>
-                <button className='m-2 mt-auto px-4 py-2 rounded-md text-white bg-green-500 shadow-lg shadow-green-300 transition-all disabled:shadow-none disabled:text-slate-500 disabled:bg-slate-200' disabled={!selected}>Submit</button>
+                <button className='m-2 mt-auto px-4 py-2 rounded-md text-white bg-green-500 shadow-lg shadow-green-300 transition-all disabled:shadow-none disabled:text-slate-500 disabled:bg-slate-200' disabled={!selected || voted} onClick={castVote}>{ voted ? "Voted" : "Submit" }</button>
               </div>
-            </React.Fragment>
+            </> :
+            <div>
+              <Link href='/login'>
+                <button className='px-3 py-2 bg-white ring-1 rounded-sm ring-sky-600 text-sky-600 cursor-pointer mr-1'>Log in</button>
+              </Link>
+              to cast your vote
+            </div>
           } 
         </div>
       </div>
-    </React.Fragment>
+    </>
 
   )
-}
-
-export async function getServerSideProps(context) {
-  const { req, params: { id } } = context
-  let pollData = null;
-  Poll.findById(id, async function(err, poll) {
-    if(err) {
-      return console.error(err)
-    }
-    const user = await User.findOne({ replitId: poll.createdBy })
-    pollData = {
-      title: poll.title,
-      votes: poll.votes,
-      options: poll.options,
-      author: user.username
-    }
-  })
-  return {
-    props: { 
-      loggedIn: Boolean(req.headers['x-replit-user-id']),
-      pollData: pollData
-    }
-  }
 }

@@ -3,7 +3,7 @@ import { SearchIcon } from "@heroicons/react/outline"
 import VoteCard from "../components/VoteCard"
 import SortBy from "../components/SortBy"
 
-export default function Browse({ user }) {
+export default function Browse() {
   const [browseType, setBrowseType] = useState("Official")
   const [filters, setFilters] = useState([])
 
@@ -31,7 +31,9 @@ export default function Browse({ user }) {
       </div>
       <div className='p-3'>
         <div className='text-right'>
-          <SortBy />
+          <SortBy onChange={filter => {
+            
+          }} />
         </div>
         <div className='flex flex-col mx-auto items-center'>
           <VoteCard data={{

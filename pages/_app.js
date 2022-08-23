@@ -14,6 +14,9 @@ function MyApp({ Component, pageProps }) {
       />
       <Header />
       <div className='layout-content'>
+        <div className='p-2 sm:hidden text-3xl text-center font-bold container mx-auto border-b'>
+          Repl<span className='text-sky-600'>Poll</span>
+        </div>
         <Component {...pageProps} />
       </div>
     </div>

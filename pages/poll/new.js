@@ -1,5 +1,6 @@
 import { InformationCircleIcon, PlusCircleIcon, RefreshIcon, TrashIcon } from "@heroicons/react/outline"
 import { useEffect, useState } from "react"
+import Link from 'next/link'
 
 function nonMutatingSplice(arr, start, deleteCount, ...items) {
   const newArr = JSON.parse(JSON.stringify(arr))
@@ -17,6 +18,7 @@ export default function NewPoll() {
   const [ready, setReady] = useState(false)
   const [error, setError] = useState()
   const [loading, setLoading] = useState("Loading...")
+  const [success, setSuccess] = useState(false)
 
   const updateOption = (e, index) => {
     setOptions(options.map((o, i) => {
@@ -63,6 +65,39 @@ export default function NewPoll() {
     }
   }, [options, title])
 
+  const createPoll = async () => {
+    setLoading('Creating...')
+    const data = await fetch('/api/poll/create', {
+      method: "POST",
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        title: title,
+        options: options.map(o => o.value)
+      })
+    }).then(res => res.json())
+    if(data.error) {
+      setError(data.error)
+      setLoading(false)
+    }else {
+      setSuccess({
+        pollId: data.pollId
+      })
+    }
+  }
+
+  if(success) {
+    return (
+      <div className='container mx-auto p-2'>
+        Your poll has been created!
+        <Link href={`/poll/${success.pollId}`}>
+          <a className='text-blue-500 ml-3'>View</a>
+        </Link>
+      </div>
+    )
+  }
+
   return (
     <div className='container mx-auto p-2'>
       <div className='font-bold text-lg mb-2'>Create a Poll</div>
@@ -96,7 +131,7 @@ export default function NewPoll() {
       <button 
         className={`p-3 rounded-md text-white shadow-lg ${ error ? 'bg-red-600 shadow-red-200' : 'disabled:bg-slate-300 bg-green-400'}  w-full flex justify-center items-center gap-2`}
         disabled={!ready || loading}
-        onClick={() => setLoading('Creating...')}
+        onClick={createPoll}
       >
           { 
             loading ?
@@ -114,17 +149,4 @@ export default function NewPoll() {
       </button>
     </div>
   )
-}
-
-export function getServerSideProps({ req }) {
-  if(!req.headers['x-replit-user-id']) {
-    return {
-      redirect: { destination: '/login' }
-    }
-  }
-  return {
-    props: {
-      user: { id: req.headers['x-replit-user-id'] }
-    }
-  }
 }

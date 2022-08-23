@@ -1,14 +1,18 @@
 import { User } from './schema'
 
 
-export function authProps({ req, res }) {
-  const replitId = req.headers['x-replit-user-id']
-  const user = await User.findOne({ replitId })
-  if(!user) return { user: null }
-  return {
-    username: user.username,
-    id: user.replitId,
-    image: user.image,
-    role: user.role
-  }
+export default function auth(req, res) {
+  return new Promise(async resolve => {
+    const replitId = req.headers['x-replit-user-id']
+    if(!replitId) return resolve(false)
+  
+    const user = await User.findOne({ replitId })
+    
+    if(!user) return resolve(false)
+  
+    resolve({
+      role: user.role,
+      id: user.replitId
+    })
+  })
 }
