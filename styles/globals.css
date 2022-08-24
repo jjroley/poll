@@ -3,35 +3,6 @@
 @tailwind utilities;
 
 
-.layout {
-  min-height: 100vh;
-  display: grid;
-  grid-template-rows: 1fr;
-}
-
-.layout-header {
-  /* grid-row: 2 / -1; */
-  position: fixed;
-  bottom: 0;
-  z-index: 10;
-  width: 100%;
-  @apply bg-white;
-}
-
-.layout-content {
-  grid-row: 1 / 2;
-  padding-bottom: 75px;
-}
-
-@media(min-width: 640px) {
-  .layout {
-    grid-template-rows: auto 1fr;
-  }
-  .layout-header {
-    grid-row: 1 / 2;
-    position: relative;
-  }
-  .layout-content {
-    grid-row: 2 / 3;
-  }
+* {
+  font-family: "Poppins", sans-serif;
 }

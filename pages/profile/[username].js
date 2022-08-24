@@ -3,6 +3,7 @@ import { useRouter } from 'next/router'
 import Loader from '../../components/Loader'
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import VoteCard from '../../components/VoteCard'
 
 export default function Profile() {
   const [user, setUser] = useState()
@@ -13,7 +14,7 @@ export default function Profile() {
   const { loading } = useUser()
 
   const loadData = async () => {
-    const userData = await fetch(`/api/user/${username}`)
+    const userData = await fetch(`/api/user/?username=${username}`)
       .then(res => res.json())
 
     setUser(userData)
@@ -62,12 +63,15 @@ export default function Profile() {
           userPolls && userPolls.length ?
             userPolls.map(poll => {
               return (
-                <Link href={`/poll/${poll._id}`} key={poll._id}>
-                  <div className='cursor-pointer m-2 p-2 bg-slate-200 hover:bg-slate-100 transition-all'>
-                    <div className='font-bold'>{poll.title}</div>
-                    <div>{poll.votes.length} voters</div>
-                  </div>
-                </Link>
+                <VoteCard 
+                  key={poll._id}
+                  data={{
+                    title: poll.title,
+                    totalVotes: poll.votes.length,
+                    totalOptions: poll.options.length,
+                    id: poll._id
+                  }}
+                />
               )
             })
             :

@@ -5,18 +5,27 @@ import Header from '../components/Header'
 import React from 'react'
 import NextNProgress from 'nextjs-progressbar'
 
+const layoutStyles = {
+  main: {
+    minHeight: '100vh',
+    display: 'grid',
+    gridTemplateRows: 'auto 1fr'
+  },
+  header: {
+    gridRow: '1 / 2'
+  },
+  content: {
+    gridRow: '2 / 3'
+  }
+}
+
 function MyApp({ Component, pageProps }) {
   return (
-    <div className='layout'>
-      <NextNProgress 
-        height={3}
-        color="rgb(14 165 233)"
-      />
-      <Header />
-      <div className='layout-content'>
-        <div className='p-2 sm:hidden text-3xl text-center font-bold container mx-auto border-b'>
-          Repl<span className='text-sky-600'>Poll</span>
-        </div>
+    <div style={layoutStyles.main}>
+      <div style={layoutStyles.header}>
+        <Header />
+      </div>
+      <div style={layoutStyles.content}>
         <Component {...pageProps} />
       </div>
     </div>

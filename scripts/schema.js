@@ -2,6 +2,11 @@ import mongoose, { Schema, models, model } from 'mongoose'
 
 mongoose.connect(process.env.MONGODB_URI, { useNewUrlParser: true })
 
+const defaultUserPermissions = () => {
+  return {
+    maxPolls: 5
+  }
+}
 const userSchema = new Schema({
   replitId: String,
   username: String,
@@ -9,7 +14,16 @@ const userSchema = new Schema({
     type: Date,
     default: Date.now
   },
-  role: String
+  role: {
+    type: String,
+    default: "DEFAULT"
+  },
+  permissions: {
+    type: {
+      maxPolls: Number,
+    },
+    default: defaultUserPermissions
+  }
 })
 
 export const User = models.User || model("User", userSchema)
@@ -18,8 +32,15 @@ const pollSchema = new Schema({
     title: String,
     official: Boolean,
     votes: {
-      type: Array,
+      type: [{
+        vote: String,
+        uid: String
+      }],
       default: []
+    },
+    voteCount: {
+      type: Number,
+      default: 0
     },
     options: [ String ],
     createdBy: String,

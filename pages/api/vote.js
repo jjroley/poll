@@ -13,7 +13,7 @@ app.post(async (req, res) => {
 
   const voteData = req.body
 
-  const user = await User.findOne({ replitId: authed.id })
+  const user = await User.findOne({ replitId: authed.replitId })
 
   if(!user) {
     return res.json({ error: "Invalid user id" })
@@ -21,15 +21,19 @@ app.post(async (req, res) => {
 
   try {
     const poll = await Poll.findById(req.body.pollId)
-    if(poll.votes.find(v => v.uid === authed.id)) {
+    if(poll.votes.find(v => v.uid === authed.replitId)) {
       return res.json({ error: "You can't vote twice" })
     }
     if(poll.options.indexOf(voteData.vote) === -1) {
       return res.json({ error: "Invalid option" })
     }
-    poll.votes.push([voteData.vote, authed.id, Date.now()])
+    poll.votes.push({
+      uid: authed.replitId,
+      vote: voteData.vote
+    })
+    poll.voteCount++
     await poll.save()
-    res.status(201).json({ success: true })
+    res.status(201).json(poll)
   }catch(e) {
     res.json({ error: "Poll does not exist" })
   }

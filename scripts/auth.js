@@ -10,9 +10,6 @@ export default function auth(req, res) {
     
     if(!user) return resolve(false)
   
-    resolve({
-      role: user.role,
-      id: user.replitId
-    })
+    resolve(user)
   })
 }

@@ -6,6 +6,8 @@ const tealPalette = ["#bce4d8","#aedcd5","#a1d5d2","#95cecf","#89c8cc","#7ec1ca"
 const skyPalette = ['#073779', '#8fd9fb', '#ffcc00', '#eb6615', '#c76402', '#b523b4']
 const classicPalette = ['#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c', '#98df8a', '#d62728', '#ff9896', '#9467bd', '#c5b0d5', '#8c564b', '#c49c94', '#e377c2', '#f7b6d2', '#7f7f7f', '#c7c7c7', '#bcbd22', '#dbdb8d', '#17becf', '#9edae5']
 
+const brightPalette = ['rgb(255, 99, 132)','rgb(255, 159, 64)','rgb(255, 205, 86)','rgb(75, 192, 192)','rgb(54, 162, 235)','rgb(153, 102, 255)','rgb(201, 203, 207)']
+
 export default function ChartComponent({ data }) {
   const [chart, setChart] = useState()
   const chartRef = useRef()
@@ -20,9 +22,8 @@ export default function ChartComponent({ data }) {
           datasets: [{
             label: data.label,
             data: data.data,
-            borderWidth: 0,
             cutout: '60%',
-            backgroundColor: classicPalette
+            backgroundColor: brightPalette
           }],
         },
         options: {
@@ -45,6 +46,15 @@ export default function ChartComponent({ data }) {
       return generateChart(chartRef.current)
     })
   }, [])
+
+  useEffect(() => {
+    if(!chart || !data) return
+    setChart(prev => {
+      prev.data.datasets[0].data = data.data
+      prev.update()
+      return prev
+    })
+  }, [ chart, data ])
 
   return (
     <div className='max-w-[700px]'>
