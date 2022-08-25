@@ -8,7 +8,7 @@ import { ChevronDoubleLeftIcon } from '@heroicons/react/outline'
 import Head from 'next/head'
 
 export default function PollPage() {
-  const { user } = useUser()
+  const { user, loading: authLoading } = useUser()
   const router = useRouter()
   const pollId = router.query.id
   const [poll, setPoll] = useState()
@@ -87,7 +87,7 @@ export default function PollPage() {
       })
   }, [pollId, user])
 
-  if (loading) {
+  if (loading || authLoading) {
     return <Loader />
   }
 

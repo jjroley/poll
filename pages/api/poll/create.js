@@ -9,42 +9,46 @@ const wordFilter = new Filter()
 const app = nextConnect()
 
 app.post(async function(req, res) {
-  console.log("Attempted poll creation", req.body)
+  try {
+    console.log("Attempted poll creation", req.body)
+    
+    const authed = await auth(req, res)
   
-  const authed = await auth(req, res)
-
-  if(!authed) {
-    return res.status(403).json({ error: "You aren't logged in"})
-  }
-
-  const polls = await Poll.find({ createdBy: authed.replitId })
-
-  if(polls && polls.length >= authed.permissions.maxPolls && authed.role !== 'ADMIN') {
-    return res.json({
-      error: `You are only allowed to make up to ${authed.permissions.maxPolls} polls.`
+    if(!authed) {
+      return res.status(403).json({ error: "You aren't logged in"})
+    }
+  
+    const polls = await Poll.find({ createdBy: authed.replitId })
+  
+    if(polls && polls.length >= authed.permissions.maxPolls && authed.role !== 'ADMIN') {
+      return res.json({
+        error: `You are only allowed to make up to ${authed.permissions.maxPolls} polls.`
+      })
+    }
+  
+    const pollData = req.body
+  
+    if(
+      wordFilter.isProfane(pollData.title) ||
+      pollData.options.find(o => wordFilter.isProfane(o))
+    ) {
+      return res.json({ error: "Please, no profanity." })
+    }
+    
+    const poll = new Poll({
+      title: pollData.title,
+      official: authed.role === 'ADMIN',
+      options: uniq(pollData.options),
+      createdBy: authed.replitId,
+      votes: [],
+      voteCount: 0
     })
-  }
-
-  const pollData = req.body
-
-  if(
-    wordFilter.isProfane(pollData.title) ||
-    pollData.options.find(o => wordFilter.isProfane(o))
-  ) {
-    return res.json({ error: "Please, no profanity." })
-  }
+    await poll.save()
   
-  const poll = new Poll({
-    title: pollData.title,
-    official: authed.role === 'ADMIN',
-    options: uniq(pollData.options),
-    createdBy: authed.replitId,
-    votes: [],
-    voteCount: 0
-  })
-  await poll.save()
-
-  res.status(201).json(poll)
+    res.status(201).json(poll)
+  }catch(e) {
+    console.error("Error creating poll", e)
+  }
 })
 
 export default app
