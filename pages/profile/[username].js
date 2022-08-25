@@ -2,8 +2,8 @@ import useUser from '../../lib/useUser'
 import { useRouter } from 'next/router'
 import Loader from '../../components/Loader'
 import { useState, useEffect } from 'react'
-import Link from 'next/link'
 import VoteCard from '../../components/VoteCard'
+import Head from 'next/head'
 
 export default function Profile() {
   const [user, setUser] = useState()
@@ -39,6 +39,10 @@ export default function Profile() {
 
 
   return (
+    <>
+    <Head>
+      <title>{userLoading ? 'Loading' : user.username} | ReplPoll</title>
+    </Head>
     <div className='container mx-auto'>
       <div className='p-2'>
         {
@@ -78,7 +82,7 @@ export default function Profile() {
             <div>It looks like this user hasn't created any polls yet</div>
         }
       </div>
-
     </div>
+    </>
   )
 }

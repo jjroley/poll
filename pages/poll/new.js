@@ -1,6 +1,7 @@
 import { InformationCircleIcon, PlusCircleIcon, RefreshIcon, TrashIcon } from "@heroicons/react/outline"
 import { useEffect, useState } from "react"
 import Link from 'next/link'
+import Head from 'next/head'
 import { uniq } from '../../lib/helpers'
 
 function nonMutatingSplice(arr, start, deleteCount, ...items) {
@@ -103,6 +104,10 @@ export default function NewPoll() {
   }
 
   return (
+    <>
+    <Head>
+      <title>New Poll | ReplPoll</title>
+    </Head>
     <div className='container mx-auto p-2 md:text-center'>
       <div className='font-bold text-lg mb-2'>Create a Poll</div>
       <input
@@ -152,5 +157,6 @@ export default function NewPoll() {
         }
       </button>
     </div>
+    </>
   )
 }

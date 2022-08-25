@@ -4,6 +4,8 @@ import Loader from '../../components/Loader'
 import Router, { useRouter } from 'next/router'
 import useUser from '../../lib/useUser'
 import Link from 'next/link'
+import { ChevronDoubleLeftIcon } from '@heroicons/react/outline'
+import Head from 'next/head'
 
 export default function PollPage() {
   const { user } = useUser()
@@ -60,29 +62,29 @@ export default function PollPage() {
     if (!pollId || !user) return
     console.log('pollid', typeof pollId)
     fetch(`/api/poll?id=${pollId}`)
-    .then(res => {
-      return res.json()
-    })
-    .then(pollData => {
-      if (!pollData || pollData.error) {
-        console.log(pollData)
-        setLoading(false)
-        return
-      }
-      
-      const alreadyVoted = pollData.votes.find(v => v.uid === user.id)
-      setVoted(alreadyVoted)
-      setSelected(alreadyVoted ? alreadyVoted.vote : false)
-
-      fetch(`/api/user?id=${pollData.createdBy}`)
-      .then(res => res.json())
-      .then(user => {
-        console.log(user)
-        setPoll(pollData)
-        setCreatedBy(user)
-        setLoading(false)
+      .then(res => {
+        return res.json()
       })
-    })
+      .then(pollData => {
+        if (!pollData || pollData.error) {
+          console.log(pollData)
+          setLoading(false)
+          return
+        }
+
+        const alreadyVoted = pollData.votes.find(v => v.uid === user.id)
+        setVoted(alreadyVoted)
+        setSelected(alreadyVoted ? alreadyVoted.vote : false)
+
+        fetch(`/api/user?id=${pollData.createdBy}`)
+          .then(res => res.json())
+          .then(user => {
+            console.log(user)
+            setPoll(pollData)
+            setCreatedBy(user)
+            setLoading(false)
+          })
+      })
   }, [pollId, user])
 
   if (loading) {
@@ -93,7 +95,7 @@ export default function PollPage() {
     return (
       <div className='container mx-auto text-center text-xl pt-4'>
         {`This poll doesn't exist. `}
-        <span 
+        <span
           className='text-blue-400 cursor-pointer'
           onClick={() => Router.back()}>Go back</span>
       </div>
@@ -102,12 +104,18 @@ export default function PollPage() {
 
   return (
     <>
+      <Head>
+        <title>{poll.title} | ReplPoll</title>
+      </Head>
       <div className='container mx-auto p-3 md:p-0'>
-        <h1 className='text-2xl font-bold mt-10'>{poll.title}</h1>
+        <div onClick={() => router.back()} className='text-blue-500 cursor-pointer mt-5 flex items-center gap-2'>
+          <ChevronDoubleLeftIcon className='w-5 h-5 text-blue-500' />back
+        </div>
+        <h1 className='text-2xl font-bold mt-5'>{poll.title}</h1>
         <Link href={`/profile/${createdBy.username}`}>
           <div className='flex gap-2 items-center text-lg font-extralight mb-10 text-black cursor-pointer'>
-            <img src={createdBy.image} className='w-10 h-10 rounded-full'/>
-            { createdBy.username }
+            <img src={createdBy.image} className='w-10 h-10 rounded-full' />
+            {createdBy.username}
           </div>
         </Link>
         <div className='flex flex-col md:flex-row'>

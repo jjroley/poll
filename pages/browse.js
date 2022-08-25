@@ -2,12 +2,12 @@ import { useState, useEffect } from "react"
 import VoteCard from "../components/VoteCard"
 import Dropdown from "../components/Dropdown"
 import Search from '../components/Search'
+import Head from 'next/head'
 
 export default function Browse() {
   const [browseType, setBrowseType] = useState("Official")
   const [filters, setFilters] = useState({
-    official: true,
-    sort: 'new'
+    sort: 'top'
   })
   const [polls, setPolls] = useState()
 
@@ -78,6 +78,10 @@ export default function Browse() {
   }
 
   return (
+    <>
+    <Head>
+      <title>Browse | ReplPoll</title>
+    </Head>
     <div className='container mx-auto'>
       <Search onSearch={keyword => {
         filter({ keyword: keyword })
@@ -98,7 +102,7 @@ export default function Browse() {
         <div className='text-right'>
           <Dropdown 
             title='Sort by'
-            options={['new','top']}
+            options={['top','new']}
             onChange={value => {
               filter({ sort: value })
             }}
@@ -128,5 +132,6 @@ export default function Browse() {
         </div>
       </div>
     </div>
+    </>
   )
 }

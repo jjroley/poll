@@ -1,8 +1,13 @@
 import { ChevronRightIcon } from "@heroicons/react/outline";
 import Link from "next/link";
+import Head from "next/head"
 
 export default function Home() {
   return (
+    <>
+    <Head>
+      <title>ReplPoll</title>
+    </Head>
     <div className="container layout-content mx-auto flex flex-col gap-10 justify-center items-center h-full">
       <h1 className="text-4xl font-bold text-center fade-in-up timing-ease anim-duration-1">
         The Ultimate <span className="text-sky-600">Voting</span> App for Replit
@@ -16,5 +21,6 @@ export default function Home() {
         </Link>
       </div>
     </div>
+    </>
   );
 }
