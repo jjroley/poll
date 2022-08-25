@@ -27,7 +27,7 @@ export default function Browse() {
   useEffect(() => {
     setPolls(null)
 
-    let query = ['?']
+    let query = []
     if(filters.official && !filters.keyword) {
       query.push('official=true')
     }
@@ -40,7 +40,7 @@ export default function Browse() {
       query.push('keyword=' + filters.keyword)
     }
 
-    fetch(`/api/poll/${query.join('&')}`)
+    fetch(`/api/poll/?${query.join('&')}`)
     .then(res => res.json())
     .then(data => {
       if(data.error) {
