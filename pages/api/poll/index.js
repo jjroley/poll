@@ -1,57 +1,56 @@
 import { Poll } from '../../../scripts/schema'
 
 export default async function handler(req, res) {
-  try {
-    if (req.query.id) {
-      Poll.findById(req.query.id, function(err, data) {
-        if (err) return res.status(404).json({ error: err })
-        res.status(200).json(data)
-      })
-      return
+  console.log('querying for polls', req.query)
+  if (req.query.id) {
+    try {
+      const poll = await Poll.findById(req.query.id)
+      res.json(poll)
+    }catch(e) {
+      res.json(false)
     }
-  
-    let filter = {}
-  
-    if (req.query.createdBy) {
-      filter.createdBy = req.query.createdBy
-    }
-  
-    if (req.query?.official === 'true') {
-      filter.official = true
-    }
-  
-    if (req.query.keyword) {
-      filter.title = {
-        $regex: req.query.keyword,
-        $options: 'i'
-      }
-    }
-  
-    const query = Poll.find(filter)
-  
-    if (req.query.sort) {
-      if (req.query.sort === 'new') {
-        query.sort({
-          createdAt: req.query?.asc === 'true' ? 1 : -1
-        })
-      }
-      if (req.query.sort === 'top') {
-        query.sort({
-          voteCount: req.query?.asc === 'true' ? 1 : -1
-        })
-      }
-    }
-  
-    if (req.query.limit) {
-      const limit = Number(req.query.limit)
-      !isNaN(limit) && query.limit(limit)
-    }
-  
-    query.exec((err, data) => {
-      if (err) return res.json([])
-      res.json(data)
-    })
-  }catch(e) {
-    console.error("Error querying polls", e)
+    return
   }
+
+  let filter = {}
+
+  if (req.query.createdBy) {
+    filter.createdBy = req.query.createdBy
+  }
+
+  if (req.query.official && req.query.official === 'true') {
+    filter.official = true
+  }
+
+  if (req.query.keyword) {
+    filter.title = {
+      $regex: req.query.keyword,
+      $options: 'i'
+    }
+  }
+
+  console.log(filter)
+
+  const query = Poll.find(filter)
+
+  if (req.query.sort) {
+    if (req.query.sort === 'new') {
+      query.sort({
+        createdAt: req.query?.asc === 'true' ? 1 : -1
+      })
+    }
+    else if (req.query.sort === 'top') {
+      query.sort({
+        voteCount: req.query?.asc === 'true' ? 1 : -1
+      })
+    }
+  }
+
+  if (req.query.limit) {
+    const limit = Number(req.query.limit)
+    !isNaN(limit) && query.limit(limit)
+  }
+
+  const data = await query.exec()
+  res.json(data)
 }
