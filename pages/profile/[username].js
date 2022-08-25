@@ -53,10 +53,10 @@ export default function Profile() {
             </div>
             :
             !user ?
-              <div>It looks like this profile doesn't exist</div>
+              <div>It looks like this profile doesn&apos;t exist</div>
               :
               <div className='flex items-center gap-2'>
-                <img src={user.image} className='w-24 h-24 rounded-full object-cover' />
+                <img src={user.image} className='w-24 h-24 rounded-full object-cover' alt='profile image' />
                 <div className='text-2xl font-bold'>{user.username}</div>
               </div>
         }
@@ -79,7 +79,7 @@ export default function Profile() {
               )
             })
             :
-            <div>It looks like this user hasn't created any polls yet</div>
+            <div>It looks like this user hasn&apos;t created any polls yet</div>
         }
       </div>
     </div>

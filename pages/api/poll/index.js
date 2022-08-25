@@ -46,11 +46,17 @@ export default async function handler(req, res) {
     }
   }
 
+  if(req.query.skip) {
+    const skipAmt = Number(req.query.skip)
+    query.skip(isNaN(skipAmt) ? 0 : skipAmt)
+  }
+
   if (req.query.limit) {
     const limit = Number(req.query.limit)
     !isNaN(limit) && query.limit(limit)
   }
 
   const data = await query.exec()
+  console.log('poll daa', data.length)
   res.json(data)
 }

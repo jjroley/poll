@@ -113,8 +113,8 @@ export default function PollPage() {
         </div>
         <h1 className='text-2xl font-bold mt-5'>{poll.title}</h1>
         <Link href={`/profile/${createdBy.username}`}>
-          <div className='flex gap-2 items-center text-lg font-extralight mb-10 text-black cursor-pointer'>
-            <img src={createdBy.image} className='w-10 h-10 rounded-full' />
+          <div className='flex gap-2 items-center w-min text-lg font-extralight mb-10 text-black cursor-pointer'>
+            <img src={createdBy.image} className='w-10 h-10 rounded-full' alt='profile image' />
             {createdBy.username}
           </div>
         </Link>

@@ -14,7 +14,7 @@ export default function ChartComponent({ data }) {
 
   useEffect(() => {
     if(chart) return
-    function generateChart(selector) {
+    const generateChart = (selector) => {
       const config = {
         type: 'doughnut',
         data: {

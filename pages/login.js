@@ -25,7 +25,7 @@ export default function Login() {
     <div className='container mx-auto'>
       <h1 className='text-4xl text-center font-bold my-10'>Login</h1>
       <form onSubmit={handleLogin} className='w-full flex justify-center'>
-        <button disabled={loading} type='submit' className='font-[300] text-center px-4 py-2 bg-sky-600 text-white rounded-md shadow-md shadow-sky-200 transition-all hover:shadow-xl flex items-center disabled:bg-slate-200'>Login with <img src='replit.svg' width='100px' className='inline'/></button>
+        <button disabled={loading} type='submit' className='font-[300] text-center px-4 py-2 bg-sky-600 text-white rounded-md shadow-md shadow-sky-200 transition-all hover:shadow-xl flex items-center disabled:bg-slate-200'>Login with <img src='replit.svg' width='100px' className='inline' alt=''/></button>
       </form>
     </div>
     </>

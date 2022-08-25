@@ -5,11 +5,12 @@ import Search from '../components/Search'
 import Head from 'next/head'
 
 export default function Browse() {
-  const [browseType, setBrowseType] = useState("Official")
   const [filters, setFilters] = useState({
-    sort: 'top'
+    loaded: false
   })
-  const [polls, setPolls] = useState()
+  const [polls, setPolls] = useState(null)
+  const [pollsLoaded, setPollsLoaded] = useState(false)
+  const loadAmt = 20
 
   const removeFilter = key => {
     const newState = { ...filters }
@@ -24,9 +25,7 @@ export default function Browse() {
     }))
   }
 
-  useEffect(() => {
-    setPolls(null)
-
+  const loadMore = ({ clear = false } = {}) => {
     let query = []
     if(filters.official && !filters.keyword) {
       query.push('official=true')
@@ -40,15 +39,34 @@ export default function Browse() {
       query.push('keyword=' + filters.keyword)
     }
 
+    query.push(`skip=${(clear || !polls) ? 0 : polls.length + 1}`)
+
+    query.push(`limit=${loadAmt}`)
+
+    console.log('fetching')
+
     fetch(`/api/poll/?${query.join('&')}`)
     .then(res => res.json())
     .then(data => {
       if(data.error) {
         
       }else {
-        setPolls(data)
+        setPolls(clear ? data : polls.concat(data))
+        setPollsLoaded(data.length < loadAmt)
       }
     })
+  }
+
+  useEffect(() => {
+    if(!filters.loaded) {
+      setFilters({
+        ...filters,
+        sort: 'top',
+        loaded: true
+      })
+      return
+    }
+    loadMore({ clear: true })
   }, [filters])
 
   const filter = (data) => {
@@ -76,6 +94,8 @@ export default function Browse() {
       }
     }
   }
+
+  var test = []
 
   return (
     <>
@@ -111,7 +131,8 @@ export default function Browse() {
         <div className='flex flex-col mx-auto items-center'>
           {
             polls && polls.length ?
-            polls.map(poll => {
+            <>
+            { polls.map((poll, index) => {
               return (
                 <VoteCard
                   key={poll._id}
@@ -124,7 +145,15 @@ export default function Browse() {
                   }} 
                 />
               )
-            }) :
+            }) }
+            {
+              !pollsLoaded &&
+              <button 
+                className='text-white font-thin px-3 py-2 bg-sky-600 rounded-sm cursor-pointer'
+                onClick={loadMore}
+              >Load more</button>
+            }
+            </> :
             polls && !polls.length ?
             <div className='text-xl font-thin'>No polls found</div> :
             <div className='text-xl font-thin'>Loading polls...</div>
