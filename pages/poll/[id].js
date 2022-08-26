@@ -19,6 +19,7 @@ export default function PollPage() {
     complete: false
   })
   const [error, setError] = useState()
+  const [deleted, setDeleted] = useState(false)
 
   const getDataForChart = useCallback(() => {
     if (!poll) {
@@ -39,6 +40,15 @@ export default function PollPage() {
       data: arr
     }
   }, [poll])
+
+  const deletePoll = async () => {
+    if(!poll) return
+    const data = await fetch(`/api/poll/delete?id=${poll._id}`, {
+      method: "DELETE"
+    })
+    .then(res => res.json())
+    data.success && setDeleted(true)
+  }
 
   const castVote = () => {
     if (!poll) return
@@ -69,7 +79,7 @@ export default function PollPage() {
   }
 
   useEffect(() => {
-    if (!router.query.id) return
+    if (!router.query.id || !user) return
     fetch(`/api/poll?id=${router.query.id}`)
       .then(res => res.json())
       .then(pollData => {
@@ -88,7 +98,7 @@ export default function PollPage() {
                 setPoll(pollData)
                 setCreator(userData)
                 console.log(pollData, userData)
-                const didVote = pollData.votes.find(v => v.uid === userData.id.toString())
+                const didVote = pollData.votes.find(v => v.uid === user.id)
                 if(didVote) {
                   setVote(prev => ({
                     ...prev,
@@ -100,10 +110,18 @@ export default function PollPage() {
             })
         }
       })
-  }, [router.query.id])
+  }, [router.query.id, user])
 
   if (loading || authLoading) {
     return <Loader />
+  }
+
+  if(deleted) {
+    return (
+      <div className='container mx-auto text-center text-xl pt-4'>
+        Your poll has been successfully deleted
+      </div>
+    )
   }
 
   if (!poll) {
@@ -163,17 +181,26 @@ export default function PollPage() {
           <ChevronDoubleLeftIcon className='w-5 h-5 text-blue-500' />back
         </div>
         <h1 className='text-2xl font-bold mt-5'>{poll.title}</h1>
-        <Link href={`/profile/${creator.username}`}>
-          <div className='flex gap-2 items-center w-min text-lg font-extralight mb-10 text-black cursor-pointer'>
-            <img
-              src={creator.image}
-              width='40px'
-              height='40px'
-              className='rounded-full'
-              alt='profile image' />
-            {creator.username}
-          </div>
-        </Link>
+        <div className='flex items-center gap-2 mb-10 mt-5'>
+          <Link href={`/profile/${creator.username}`}>
+            <div className='flex gap-2 items-center text-lg font-extralight text-black cursor-pointer'>
+              <img
+                src={creator.image}
+                width='40px'
+                height='40px'
+                className='rounded-full'
+                alt='profile image' />
+              {creator.username}
+            </div>
+          </Link>
+          {
+            user.id === poll.createdBy &&
+            <button
+              className='px-3 py-2 bg-red-500 text-white cursor-pointer rounded-sm text-sm font-thin'  
+              onClick={deletePoll}
+            >Delete Poll</button>
+          }
+        </div>
         <div className='flex flex-col md:flex-row'>
           <div className='w-full md:w-2/3 max-w-[700px]'>
             <ChartComponent data={getDataForChart()} />
