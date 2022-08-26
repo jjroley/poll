@@ -45,6 +45,10 @@ export default function Browse() {
 
     console.log('fetching')
 
+    if(clear) {
+      setPolls(null)
+    }
+
     fetch(`/api/poll/?${query.join('&')}`)
     .then(res => res.json())
     .then(data => {

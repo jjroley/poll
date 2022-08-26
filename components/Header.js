@@ -6,18 +6,16 @@ import useUser from '../lib/useUser'
 export default function Header() {
   const { user, loading } = useUser()
 
-  if (loading) {
-    return null
-  }
-
   return (
-    <header className="container mx-auto flex items-center border-b p-2">
+    <header className="container mx-auto flex items-center border-b p-2 min-h-[70px]">
       <Link href="/">
         <h1 className="text-xl font-extrabold uppercase cursor-pointer">
           Repl<span className='text-sky-600'>Poll</span>
         </h1>
       </Link>
       {
+        loading ?
+        <div className='ml-auto mr-2'>Loading...</div> :
         user.loggedIn ?
           <>
             <div className='flex items-center px-2 relative ml-auto gap-2'>

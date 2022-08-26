@@ -21,7 +21,7 @@ app.post(async (req, res) => {
   const user = await User.findOne({ replitId: authed.replitId })
 
   if(!user) {
-    return res.json({ error: "Invalid user id" })
+    return res.json({ error: "Not logged in" })
   }
 
   try {

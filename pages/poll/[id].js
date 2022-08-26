@@ -21,7 +21,7 @@ export default function PollPage() {
   const [error, setError] = useState()
 
   const getDataForChart = useCallback(() => {
-    if(!poll) {
+    if (!poll) {
       return {
         title: '',
         labels: [],
@@ -29,73 +29,80 @@ export default function PollPage() {
       }
     }
     const options = poll.options
-    const obj = {}
-    options.forEach(o => {
-      obj[o] = 0
-    })
+    const arr = new Array(options.length).fill(0)
     poll.votes.forEach(v => {
-      obj[v.vote]++
+      arr[v.index]++
     })
     return {
       title: poll.title,
       labels: poll.options,
-      data: Object.values(obj)
+      data: arr
     }
   }, [poll])
 
   const castVote = () => {
-    if(!poll) return
-    if(vote.index < 0 || vote.index >= poll.options.length) return
+    if (!poll) return
+    if (vote.index < 0 || vote.index >= poll.options.length) return
     fetch('/api/vote', {
       method: 'POST',
       headers: {
         'Content-Type': "application/json",
       },
       body: JSON.stringify({
-        voteIndex: vote.index
+        index: vote.index,
+        pollId: poll._id
       })
     })
-    .then(res => {
-      if(res.status === 201) {
-        setVote(prev => ({ ...prev, complete: true }))
-      }
-      return res.json()
-    })
-    .then(data => {
-      if(data.error) {
-        setError(data.error)
-      }else {
-        setPoll(data)
-      }
-    })
+      .then(res => {
+        if (res.status === 201) {
+          setVote(prev => ({ ...prev, complete: true }))
+        }
+        return res.json()
+      })
+      .then(data => {
+        if (data.error) {
+          setError(data.error)
+        } else {
+          setPoll(data)
+        }
+      })
   }
 
   useEffect(() => {
-    if(!router.query.id) return
+    if (!router.query.id) return
     fetch(`/api/poll?id=${router.query.id}`)
-    .then(res => res.json())
-    .then(pollData => {
-      if(!pollData) {
-        setPoll(false)
-        setLoading(false)
-      }else {
-        const { createdBy } = pollData
-        fetch(`/api/user?id=${createdBy}`)
-        .then(res => res.json())
-        .then(userData => {
+      .then(res => res.json())
+      .then(pollData => {
+        if (!pollData) {
+          setPoll(false)
           setLoading(false)
-          if(!userData) {
-            setPoll(false)
-          }else {
-            setPoll(pollData)
-            setCreator(userData)
-          }
-        })
-      }
-    })
+        } else {
+          const { createdBy } = pollData
+          fetch(`/api/user?id=${createdBy}`)
+            .then(res => res.json())
+            .then(userData => {
+              setLoading(false)
+              if (!userData) {
+                setPoll(false)
+              } else {
+                setPoll(pollData)
+                setCreator(userData)
+                console.log(pollData, userData)
+                const didVote = pollData.votes.find(v => v.uid === userData.id.toString())
+                if(didVote) {
+                  setVote(prev => ({
+                    ...prev,
+                    index: didVote.index,
+                    complete: true
+                  }))
+                }
+              }
+            })
+        }
+      })
   }, [router.query.id])
-  
-  if(loading || authLoading) {
+
+  if (loading || authLoading) {
     return <Loader />
   }
 
@@ -123,18 +130,18 @@ export default function PollPage() {
                   <button
                     key={option}
                     className={`flex items-center gap-1 px-3 py-2 m-1 font-thin rounded-md border border-sky-800 ${isSelected ? 'bg-green-500 shadow-green-300 text-white border-transparent' : 'bg-sky-800 text-white hover:bg-white hover:text-black'} transition-all shadow-lg cursor-pointer`}
-                    onClick={() => !vote.complete && setVote(prev => ({ ...prev, index })) } >
+                    onClick={() => !vote.complete && setVote(prev => ({ ...prev, index }))} >
                     {option}
                   </button>
                 )
               })
             }
           </div>
-          <button 
-            className={`m-2 mt-auto px-4 py-2 rounded-md text-white bg-green-500 shadow-lg  transition-all  ${error ? 'bg-red-500 shadow-red-300' : 'shadow-green-300 disabled:shadow-none disabled:text-slate-500 disabled:bg-slate-200'}`} 
-            disabled={vote.index < 0 || vote.complete} 
+          <button
+            className={`m-2 mt-auto px-4 py-2 rounded-md text-white bg-green-500 shadow-lg  transition-all  ${error ? 'bg-red-500 shadow-red-300' : 'shadow-green-300 disabled:shadow-none disabled:text-slate-500 disabled:bg-slate-200'}`}
+            disabled={vote.index < 0 || vote.complete}
             onClick={castVote}>
-              {error ? error : vote.complete ? "Voted" : "Submit"}
+            {error ? error : vote.complete ? "Voted" : "Submit"}
           </button>
         </div>
       </> :
@@ -149,7 +156,7 @@ export default function PollPage() {
   return (
     <>
       <Head>
-        <title>{ poll.title } | ReplPoll</title>
+        <title>{poll.title} | ReplPoll</title>
       </Head>
       <div className='container mx-auto p-3 md:p-0'>
         <div onClick={() => router.back()} className='text-blue-500 cursor-pointer mt-5 flex items-center gap-2'>
@@ -158,7 +165,7 @@ export default function PollPage() {
         <h1 className='text-2xl font-bold mt-5'>{poll.title}</h1>
         <Link href={`/profile/${creator.username}`}>
           <div className='flex gap-2 items-center w-min text-lg font-extralight mb-10 text-black cursor-pointer'>
-            <img 
+            <img
               src={creator.image}
               width='40px'
               height='40px'
@@ -171,8 +178,8 @@ export default function PollPage() {
           <div className='w-full md:w-2/3 max-w-[700px]'>
             <ChartComponent data={getDataForChart()} />
           </div>
-          
-          { votesSection }
+
+          {votesSection}
         </div>
       </div>
     </>

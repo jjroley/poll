@@ -43,7 +43,7 @@ app.post(async function(req, res) {
   const poll = new Poll({
     title: pollData.title,
     official: authed.role === 'ADMIN',
-    options: pollData.options,
+    options: pollData.options.filter(o => !!o),
     createdBy: authed.replitId,
     votes: [],
     voteCount: 0

@@ -43,8 +43,8 @@ export default function NewPoll() {
 
   useEffect(() => {
     const invalid = pollIsInvalid({ options: options.map(o => o.value), title })
-    setError(invalid?.error)
-    setReady(invalid?.success)
+    setError(invalid.error ? invalid.error : null)
+    setReady(invalid.success ? true : false)
   }, [options, title])
 
   const createPoll = async () => {
