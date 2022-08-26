@@ -104,7 +104,7 @@ export default function Browse() {
     </Head>
     <div className='container mx-auto'>
       <Search onSearch={keyword => {
-        filter({ keyword: keyword })
+        filter({ keyword })
       }}/>
       <div className='flex justify-center'>
         <div

@@ -2,7 +2,7 @@ import { InformationCircleIcon, PlusCircleIcon, RefreshIcon, TrashIcon } from "@
 import { useEffect, useState } from "react"
 import Link from 'next/link'
 import Head from 'next/head'
-import { uniq } from '../../lib/helpers'
+import { pollIsInvalid } from '../../lib/helpers'
 
 function nonMutatingSplice(arr, start, deleteCount, ...items) {
   const newArr = JSON.parse(JSON.stringify(arr))
@@ -42,32 +42,9 @@ export default function NewPoll() {
   }, [])
 
   useEffect(() => {
-    if (title.length > 100) {
-      setError('Title is too long')
-    }
-    else if (options.length < 2) {
-      setError('At least two options needed')
-    }
-    else if (options.length > 10) {
-      setError('There must be 10 options or less')
-    }
-    else if (uniq(options.map(o => o.value), '').length !== options.length) {
-      setError("Duplicate options")
-    }
-    else {
-      setError(null)
-    }
-    if (
-      title.length <= 100 &&
-      title.length &&
-      options.length > 1 &&
-      options.length <= 10 &&
-      options.every(o => o.value !== '')
-    ) {
-      setReady(true)
-    } else {
-      setReady(false)
-    }
+    const invalid = pollIsInvalid({ options: options.map(o => o.value), title })
+    setError(invalid?.error)
+    setReady(invalid?.success)
   }, [options, title])
 
   const createPoll = async () => {

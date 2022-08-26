@@ -2,7 +2,7 @@ import nextConnect from "next-connect";
 import { Poll } from '../../../lib/schema'
 import auth from '../../../scripts/auth'
 import Filter from 'bad-words'
-import { uniq } from '../../../lib/helpers'
+import { pollIsInvalid } from '../../../lib/helpers'
 
 const wordFilter = new Filter()
 
@@ -33,11 +33,17 @@ app.post(async function(req, res) {
   ) {
     return res.json({ error: "Please, no profanity." })
   }
+
+  const invalid = pollIsInvalid({ title: pollData.title, options: pollData.options })
+
+  if(invalid.error) {
+    return res.json({ error: invalid.error })
+  }
   
   const poll = new Poll({
     title: pollData.title,
     official: authed.role === 'ADMIN',
-    options: uniq(pollData.options),
+    options: pollData.options,
     createdBy: authed.replitId,
     votes: [],
     voteCount: 0
