@@ -1,4 +1,4 @@
-import { User } from './schema'
+import { User } from '../lib/schema'
 
 
 export default function auth(req, res) {

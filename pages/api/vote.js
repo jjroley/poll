@@ -12,6 +12,11 @@ app.post(async (req, res) => {
   }
 
   const voteData = req.body
+  const voteIndex = Number(voteData.index)
+
+  if(isNaN(voteIndex)) {
+    return res.json({ error: "Invalid vote data" })
+  }
 
   const user = await User.findOne({ replitId: authed.replitId })
 
@@ -21,15 +26,15 @@ app.post(async (req, res) => {
 
   try {
     const poll = await Poll.findById(req.body.pollId)
+    if(voteIndex < 0 || voteIndex >= poll.options.length) {
+      return res.json({ error: "Invalid vote" })
+    }
     if(poll.votes.find(v => v.uid === authed.replitId)) {
       return res.json({ error: "You can't vote twice" })
     }
-    if(poll.options.indexOf(voteData.vote) === -1) {
-      return res.json({ error: "Invalid option" })
-    }
     poll.votes.push({
       uid: authed.replitId,
-      vote: voteData.vote
+      index: voteIndex
     })
     poll.voteCount++
     await poll.save()

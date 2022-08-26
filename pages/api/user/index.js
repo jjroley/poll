@@ -1,4 +1,4 @@
-import { User } from '../../../scripts/schema'
+import { User } from '../../../lib/schema'
 import Gql from '../../../scripts/replitGql'
 
 const replitGql = new Gql('')

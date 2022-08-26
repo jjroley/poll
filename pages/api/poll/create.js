@@ -1,5 +1,5 @@
 import nextConnect from "next-connect";
-import { Poll } from '../../../scripts/schema'
+import { Poll } from '../../../lib/schema'
 import auth from '../../../scripts/auth'
 import Filter from 'bad-words'
 import { uniq } from '../../../lib/helpers'

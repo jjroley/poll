@@ -1,7 +1,12 @@
-import { Poll } from '../../../scripts/schema'
+import { Poll } from '../../../lib/schema'
+import nextConnect from 'next-connect'
 
-export default async function handler(req, res) {
+const app = nextConnect()
+
+app.get(async (req, res) => {
+
   console.log('querying for polls', req.query)
+
   if (req.query.id) {
     try {
       const poll = await Poll.findById(req.query.id)
@@ -59,4 +64,6 @@ export default async function handler(req, res) {
   const data = await query.exec()
   console.log('poll daa', data.length)
   res.json(data)
-}
+})
+
+export default app

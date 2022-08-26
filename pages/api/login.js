@@ -1,5 +1,5 @@
 import nextConnect from 'next-connect'
-import { User } from '../../scripts/schema'
+import { User } from '../../lib/schema'
 
 const app = nextConnect()
 
