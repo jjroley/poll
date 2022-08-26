@@ -1,5 +1,5 @@
 import nextConnect from "next-connect"
-import { Poll, User } from '../../scripts/schema'
+import { Poll, User } from '../../lib/schema'
 import auth from '../../scripts/auth'
 
 const app = nextConnect()
