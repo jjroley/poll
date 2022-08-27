@@ -6,7 +6,7 @@ import ChartComponent from "../../components/Chart"
 import Loader from '../../components/Loader'
 import Router, { useRouter } from 'next/router'
 import useUser from '../../lib/useUser'
-
+import Swal from 'sweetalert2'
 
 export default function PollPage() {
   const router = useRouter()
@@ -43,11 +43,26 @@ export default function PollPage() {
 
   const deletePoll = async () => {
     if(!poll) return
-    const data = await fetch(`/api/poll/delete?id=${poll._id}`, {
-      method: "DELETE"
+    Swal.fire({
+      title: "Are you sure you want to delete this?",
+      showDenyButton: true,
+      confirmButtonText: "Yes",
+      confirmButtonColor: 'green'
+    }).then(async (result) => {
+      if(result.isConfirmed) {
+        const data = await fetch(`/api/poll/delete?id=${poll._id}`, {
+          method: "DELETE"
+        })
+        .then(res => res.json())
+        if(data.success) {
+          setDeleted(true)
+        }else {
+          Swal.fire("Error:", data.error)
+        }
+      }
     })
-    .then(res => res.json())
-    data.success && setDeleted(true)
+    return
+    
   }
 
   const castVote = () => {
@@ -97,7 +112,6 @@ export default function PollPage() {
               } else {
                 setPoll(pollData)
                 setCreator(userData)
-                console.log(pollData, userData)
                 const didVote = pollData.votes.find(v => v.uid === user.id)
                 if(didVote) {
                   setVote(prev => ({
@@ -177,8 +191,8 @@ export default function PollPage() {
         <title>{poll.title} | ReplPoll</title>
       </Head>
       <div className='container mx-auto p-3 md:p-0'>
-        <div onClick={() => router.back()} className='text-blue-500 cursor-pointer mt-5 flex items-center gap-2'>
-          <ChevronDoubleLeftIcon className='w-5 h-5 text-blue-500' />back
+        <div onClick={() => router.push('/browse')} className='text-blue-500 cursor-pointer mt-5 flex items-center gap-2'>
+          <ChevronDoubleLeftIcon className='w-5 h-5 text-blue-500' />browse
         </div>
         <h1 className='text-2xl font-bold mt-5'>{poll.title}</h1>
         <div className='flex items-center gap-2 mb-10 mt-5'>

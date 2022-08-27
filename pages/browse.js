@@ -114,7 +114,7 @@ export default function Browse() {
         <div
           onClick={() => { filter({ type: 'official' }) }}
           className={`cursor-pointer w-32 py-4 text-center border-b-4 ${filters.official ? 'border-black' : 'border-slate-200'}`}>
-          Official
+          Featured
         </div>
         <div 
           onClick={() => { filter({ type: 'community' }) }}

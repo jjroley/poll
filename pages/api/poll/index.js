@@ -5,8 +5,6 @@ const app = nextConnect()
 
 app.get(async (req, res) => {
 
-  console.log('querying for polls', req.query)
-
   if (req.query.id) {
     try {
       const poll = await Poll.findById(req.query.id)
@@ -34,8 +32,6 @@ app.get(async (req, res) => {
     }
   }
 
-  console.log(filter)
-
   const query = Poll.find(filter)
 
   if (req.query.sort) {
@@ -62,7 +58,6 @@ app.get(async (req, res) => {
   }
 
   const data = await query.exec()
-  console.log('poll daa', data.length)
   res.json(data)
 })
 

@@ -9,7 +9,6 @@ const wordFilter = new Filter()
 const app = nextConnect()
 
 app.post(async function(req, res) {
-  console.log("Attempted poll creation", req.body)
   
   const authed = await auth(req, res)
 
