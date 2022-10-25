@@ -1,15 +1,16 @@
 import Link from 'next/link'
 import { CheckCircleIcon, UsersIcon } from '@heroicons/react/outline'
 
+
 export default function VoteCard({ data }) {
-  const isNew = new Date(data.datePublished).getTime() > Date.now() - 1000 * 60 * 60 * 24
   const style = {}
   if(data.bg) {
     style.backgroundColor = data.bg
   }
+
   return (
     <Link href={`/poll/${data.id}`}>
-      <div 
+      <div
         className='relative w-full md:w-96 bg-slate-200 rounded-md p-4 px-5 my-2 cursor-pointer transition-shadow hover:shadow-lg'
         style={style}
         >

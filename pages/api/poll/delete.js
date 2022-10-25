@@ -18,7 +18,7 @@ app.delete(async (req, res) => {
 
   try {
     const poll = await Poll.findById(req.query.id)
-    if(authed.role !== 'ADMIN' && poll.createdBy !== authed.id) {
+    if(authed.role !== "ADMIN" && poll.createdBy !== authed.replitId) {
       return res.json({ error: "You can't delete someone else's poll"})
     }
   }catch(e) {

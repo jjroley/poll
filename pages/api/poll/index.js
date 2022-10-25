@@ -57,8 +57,7 @@ app.get(async (req, res) => {
     !isNaN(limit) && query.limit(limit)
   }
 
-  const data = await query.exec()
-  res.json(data)
+  res.json(await query.exec())
 })
 
 export default app

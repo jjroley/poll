@@ -8,6 +8,33 @@ import Router, { useRouter } from 'next/router'
 import useUser from '../../lib/useUser'
 import Swal from 'sweetalert2'
 
+const AdminArea = ({ poll, deletePoll }) => {
+  const featurePoll = () => {
+    fetch('/api/admin/feature', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        pollId: poll._id,
+        feature: 'toggle'
+      })
+    })
+  }
+  return (
+    <div className='flex flex-wrap p-3 items-center bg-red-200'>
+      <span className='text-lg font-bold'>Admin</span>
+      <button
+        className='px-3 py-2 bg-red-500 text-white cursor-pointer rounded-sm text-sm font-thin'  
+        onClick={ deletePoll }
+      >Delete Poll</button>
+      <input type='checkbox'>
+        <label>Featured</label>
+      </input>
+    </div>
+  )
+}
+
 export default function PollPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useUser()
@@ -61,8 +88,6 @@ export default function PollPage() {
         }
       }
     })
-    return
-    
   }
 
   const castVote = () => {
