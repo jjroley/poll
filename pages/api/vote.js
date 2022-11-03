@@ -7,7 +7,7 @@ const app = nextConnect()
 app.post(async (req, res) => {
   const authed = await auth(req, res)
 
-  if(!authed) {
+  if(!authed.loggedIn) {
     return res.json({ error: "You are not logged in" })
   }
 

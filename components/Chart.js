@@ -8,15 +8,33 @@ const classicPalette = ['#1f77b4', '#aec7e8', '#ff7f0e', '#ffbb78', '#2ca02c', '
 
 const brightPalette = ['rgb(255, 99, 132)','rgb(255, 159, 64)','rgb(255, 205, 86)','rgb(75, 192, 192)','rgb(54, 162, 235)','rgb(153, 102, 255)','rgb(201, 203, 207)']
 
+const CHART_CONFIG = {
+  type: 'doughnut',
+  
+  options: {
+    plugins: {
+      tooltip: {
+        displayColors: false
+      },
+      legend: {
+        position: 'left'
+      }
+    },
+    aspectRatio: 1.5
+  }
+}
+
 export default function ChartComponent({ data }) {
   const [chart, setChart] = useState()
   const chartRef = useRef()
 
   useEffect(() => {
     if(chart) return
-    const generateChart = (selector) => {
-      const config = {
-        type: 'doughnut',
+
+    setChart(prev => {
+      if(prev) return prev
+      return new Chart(chartRef.current, { 
+        ...CHART_CONFIG, 
         data: {
           labels: data.labels,
           datasets: [{
@@ -25,25 +43,8 @@ export default function ChartComponent({ data }) {
             cutout: '60%',
             backgroundColor: brightPalette
           }],
-        },
-        options: {
-          plugins: {
-            tooltip: {
-              displayColors: false
-            },
-            legend: {
-              position: 'left'
-            }
-          },
-          aspectRatio: 1.5
         }
-      }
-      const chart = new Chart(selector, config)
-      return chart
-    }
-    setChart(prev => {
-      if(prev) return prev
-      return generateChart(chartRef.current)
+      })
     })
   }, [])
 
@@ -54,6 +55,8 @@ export default function ChartComponent({ data }) {
       prev.update()
       return prev
     })
+
+    console.log(chart)
   }, [ chart, data ])
 
   return (
@@ -61,4 +64,11 @@ export default function ChartComponent({ data }) {
       <canvas ref={chartRef}></canvas>  
     </div>
   )
+}
+
+export function getChartImage(data) {
+  const canvas = document.createElement('canvas')
+  canvas.width = canvas.height = 200
+  var chart = new Chart(canvas, { ...CHART_CONFIG, data })
+  return chart.canvas.toDataURL()
 }

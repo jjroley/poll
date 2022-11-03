@@ -2,11 +2,13 @@ import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
 import Head from 'next/head'
 import { ChevronDoubleLeftIcon } from '@heroicons/react/outline'
-import ChartComponent from "../../components/Chart"
-import Loader from '../../components/Loader'
-import Router, { useRouter } from 'next/router'
-import useUser from '../../lib/useUser'
+import ChartComponent, { getChartImage } from "../../components/Chart"
+import Router from 'next/router'
 import Swal from 'sweetalert2'
+import { Poll, User } from '../../lib/schema'
+import Gql from '../../scripts/replitGql'
+import auth from '../../scripts/auth'
+
 
 const AdminArea = ({ poll, deletePoll }) => {
   const featurePoll = () => {
@@ -35,38 +37,13 @@ const AdminArea = ({ poll, deletePoll }) => {
   )
 }
 
-export default function PollPage() {
-  const router = useRouter()
-  const { user, loading: authLoading } = useUser()
-  const [loading, setLoading] = useState(true)
-  const [poll, setPoll] = useState(null)
-  const [creator, setCreator] = useState(null)
+export default function PollPage({ poll, user, creator, chartData }) {
+  const [deleted, setDeleted] = useState(false)
+  const [image, setImage] = useState('/favicon.ico')
   const [vote, setVote] = useState({
     index: -1,
     complete: false
   })
-  const [error, setError] = useState()
-  const [deleted, setDeleted] = useState(false)
-
-  const getDataForChart = useCallback(() => {
-    if (!poll) {
-      return {
-        title: '',
-        labels: [],
-        data: []
-      }
-    }
-    const options = poll.options
-    const arr = new Array(options.length).fill(0)
-    poll.votes.forEach(v => {
-      arr[v.index]++
-    })
-    return {
-      title: poll.title,
-      labels: poll.options,
-      data: arr
-    }
-  }, [poll])
 
   const deletePoll = async () => {
     if(!poll) return
@@ -116,43 +93,6 @@ export default function PollPage() {
           setPoll(data)
         }
       })
-  }
-
-  useEffect(() => {
-    if (!router.query.id || !user) return
-    fetch(`/api/poll?id=${router.query.id}`)
-      .then(res => res.json())
-      .then(pollData => {
-        if (!pollData) {
-          setPoll(false)
-          setLoading(false)
-        } else {
-          const { createdBy } = pollData
-          fetch(`/api/user?id=${createdBy}`)
-            .then(res => res.json())
-            .then(userData => {
-              setLoading(false)
-              if (!userData) {
-                setPoll(false)
-              } else {
-                setPoll(pollData)
-                setCreator(userData)
-                const didVote = pollData.votes.find(v => v.uid === user.id)
-                if(didVote) {
-                  setVote(prev => ({
-                    ...prev,
-                    index: didVote.index,
-                    complete: true
-                  }))
-                }
-              }
-            })
-        }
-      })
-  }, [router.query.id, user])
-
-  if (loading || authLoading) {
-    return <Loader />
   }
 
   if(deleted) {
@@ -214,11 +154,14 @@ export default function PollPage() {
     <>
       <Head>
         <title>{poll.title} | ReplPoll</title>
+        <meta property="og:title" content={poll.title} />
+        <meta property="og:image" src={image} />
       </Head>
       <div className='container mx-auto p-3 md:p-0'>
         <div onClick={() => router.push('/browse')} className='text-blue-500 cursor-pointer mt-5 flex items-center gap-2'>
           <ChevronDoubleLeftIcon className='w-5 h-5 text-blue-500' />browse
         </div>
+        { user.role === "ADMIN" && <AdminArea />}
         <h1 className='text-2xl font-bold mt-5'>{poll.title}</h1>
         <div className='flex items-center gap-2 mb-10 mt-5'>
           <Link href={`/profile/${creator.username}`}>
@@ -242,12 +185,75 @@ export default function PollPage() {
         </div>
         <div className='flex flex-col md:flex-row'>
           <div className='w-full md:w-2/3 max-w-[700px]'>
-            <ChartComponent data={getDataForChart()} />
+            <ChartComponent data={chartData} />
           </div>
-
           {votesSection}
         </div>
       </div>
     </>
   )
+}
+
+export async function getServerSideProps({ req, res, params }) {
+  const user = await auth(req, res)
+  
+  const getDataForChart = (poll) => {
+    if (!poll) {
+      return {
+        title: '',
+        labels: [],
+        data: []
+      }
+    }
+    const options = poll.options
+    const arr = new Array(options.length).fill(0)
+    poll.votes.forEach(v => {
+      arr[v.index]++
+    })
+    return {
+      title: poll.title,
+      labels: poll.options,
+      data: arr
+    }
+  }
+
+  try {
+    const poll = await Poll.findById(params.id)
+
+    const creator = await User.findOne({ replitId: poll.createdBy })
+
+    const replitGql = new Gql('')
+    const creatorImage = await replitGql.raw({
+      query: `query user($id: Int!) {
+        user(id: $id) {
+          image
+        } 
+      }`,
+      variables: {
+        id: Number(poll.createdBy)
+      }
+    })
+
+    return {
+      props: {
+        user: user,
+        creator: { username: creator.username, image: creatorImage.data?.user.image },
+        poll: { 
+          title: poll.title, 
+          official: poll.official, 
+          votes: poll.votes.map(v => ({ index: v.index, uid: v.uid })), 
+          createdBy: poll.createdBy, 
+          createdAt: poll.createdAt.toString()
+        },
+        chartData: getDataForChart(poll)
+      }
+    }
+  }catch (e) {
+    console.log("Error", e)
+    return {
+      props: { user, poll: null, creator: null }
+    }
+  }
+
+  
 }
