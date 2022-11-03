@@ -9,7 +9,7 @@ app.post(async (req, res) => {
   if(authed.role !== "ADMIN") {
     return res.json({ error: "Not authorized" })
   }
-  if(!req.body.pollId || !req.body.feature) {
+  if(!req.body.pollId || typeof req.body.feature === 'undefined') {
     return res.json({ error: "Invalid data" })
   }
   try {
@@ -20,7 +20,7 @@ app.post(async (req, res) => {
       !!req.body.feature
     )
     await poll.save()
-    res.json({ success: true })
+    res.json({ success: true, featured: poll.official })
   }catch(e) {
     return res.json({ error: "Poll not found" })
   }

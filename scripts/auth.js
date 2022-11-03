@@ -11,6 +11,13 @@ export default function auth(req, res) {
     
     if(!user) return resolve(loggedOutUser)
   
-    resolve({ ...user, loggedIn: true })
+    resolve({
+      username: user.username,
+      replitId: user.replitId,
+      role: user.role,
+      loggedIn: true,
+      permissions: { maxPolls: user.permissions.maxPolls },
+      _id: user._id.toString()
+    })
   })
 }

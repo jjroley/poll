@@ -44,8 +44,6 @@ export default function Browse() {
 
     query.push(`limit=${loadAmt}`)
 
-    console.log('skip: ' + (polls?.length), '')
-
     const data = await fetch(`/api/poll/?${query.join('&')}`).then(res => res.json())
 
     const arr = (config?.clear || !polls) ? data : [...polls, ...data]
@@ -69,7 +67,6 @@ export default function Browse() {
       return
     }
     getPolls({ clear: true }).then(data => {
-      console.log(data, 'data')
       if (data.error) {
 
       } else {

@@ -1,6 +1,7 @@
 import nextConnect from "next-connect"
 import { Poll, User } from '../../lib/schema'
 import auth from '../../scripts/auth'
+import { getSerializedPollData } from '../../lib/helpers'
 
 const app = nextConnect()
 
@@ -38,7 +39,7 @@ app.post(async (req, res) => {
     })
     poll.voteCount++
     await poll.save()
-    res.status(201).json(poll)
+    res.status(201).json(getSerializedPollData(poll))
   }catch(e) {
     res.json({ error: "Poll does not exist" })
   }

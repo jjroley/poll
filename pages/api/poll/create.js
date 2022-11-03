@@ -12,7 +12,7 @@ app.post(async function(req, res) {
   
   const authed = await auth(req, res)
 
-  if(!authed) {
+  if(!authed.loggedIn) {
     return res.status(403).json({ error: "You aren't logged in"})
   }
 

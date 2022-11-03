@@ -55,8 +55,6 @@ export default function ChartComponent({ data }) {
       prev.update()
       return prev
     })
-
-    console.log(chart)
   }, [ chart, data ])
 
   return (
