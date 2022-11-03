@@ -17,21 +17,28 @@ export default async function handler(req, res) {
   const user = await User.findOne(filter)
 
   if(!user) {
-    return res.json({ error: "User not found" })
+    return res.status(404).json({ error: "User not found" })
   }
 
-  const replitData = await replitGql.raw({
-    query: `query user($id: Int!) {
-      user(id: $id) {
-        image username id
-      } 
-    }`,
-    variables: {
-      id: Number(user.replitId)
-    }
-  });
 
-  if(!replitData.data) return res.status(404).json(false)
-  
-  res.json(replitData.data.user)
+  try {
+    const replitData = await replitGql.raw({
+      query: `query user($id: Int!) {
+        user(id: $id) {
+          image username id
+        } 
+      }`,
+      variables: {
+        id: Number(user.replitId)
+      }
+    });
+    if(replitData.data.user) {
+      res.json(replitData.data?.user)
+    }else {
+      res.status(404).json({ error: "User not found" })
+    }
+  } catch(err) {
+    console.log("Error fetching replit data", err)
+    res.status(404).json({ error: "User not found" })
+  }
 }
