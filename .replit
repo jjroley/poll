@@ -1,6 +1,6 @@
 
 hidden = [".config"]
-run = "npm run build && npm run serve"
+run = "npm run build && npm run start"
 
 [[hints]]
 regex = "Error \\[ERR_REQUIRE_ESM\\]"
