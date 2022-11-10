@@ -242,16 +242,17 @@ export async function getServerSideProps({ req, res, params }) {
         id: Number(poll.createdBy)
       }
     })
+    
+    const vote = poll.votes.find(v => v.uid === user.replitId)
 
-    const voteIndex = poll.votes.findIndex(v => v.uid === user.replitId)
     return {
       props: {
         user: user,
         creator: { username: creator.username, image: creatorImage.data?.user.image },
         pollData: getSerializedPollData(poll),
         voteData: {
-          complete: voteIndex !== -1,
-          index: voteIndex
+          complete: !!vote,
+          index: vote ? vote.index : -1
         }
       }
     }
