@@ -11,31 +11,31 @@ import auth from '../../scripts/auth'
 import { getSerializedPollData } from '../../lib/helpers'
 
 const getDataForChart = (poll) => {
-    if (!poll) {
-      return {
-        title: '',
-        labels: [],
-        data: []
-      }
-    }
-    const options = poll.options
-    const arr = new Array(options.length).fill(0)
-    poll.votes.forEach(v => {
-      arr[v.index]++
-    })
+  if (!poll) {
     return {
-      title: poll.title,
-      labels: poll.options,
-      data: arr
+      title: '',
+      labels: [],
+      data: []
     }
   }
+  const options = poll.options
+  const arr = new Array(options.length).fill(0)
+  poll.votes.forEach(v => {
+    arr[v.index]++
+  })
+  return {
+    title: poll.title,
+    labels: poll.options,
+    data: arr
+  }
+}
 
 const AdminArea = ({ poll, deletePoll }) => {
   const [featured, setFeatured] = useState(poll.official)
 
   const toggleFeatured = (e) => {
     setFeatured(e.target.checked)
-    
+
     fetch('/api/admin/feature', {
       method: 'POST',
       headers: {
@@ -46,20 +46,20 @@ const AdminArea = ({ poll, deletePoll }) => {
         feature: 'toggle'
       })
     })
-    .then(res => res.json())
-    .then(data => {
-      if(data.error) {
-        Swal.fire("Error:", data.error)
-      }
-    })
+      .then(res => res.json())
+      .then(data => {
+        if (data.error) {
+          Swal.fire("Error:", data.error)
+        }
+      })
   }
-  
+
   return (
     <div className='flex flex-wrap p-3 items-center bg-red-200 gap-3 mt-2'>
       <span className='text-lg font-bold'>Admin</span>
       <button
-        className='px-3 py-2 bg-red-500 text-white cursor-pointer rounded-sm text-sm font-thin'  
-        onClick={ deletePoll }
+        className='px-3 py-2 bg-red-500 text-white cursor-pointer rounded-sm text-sm font-thin'
+        onClick={deletePoll}
       >Delete Poll</button>
       <label><input type='checkbox' checked={featured} onChange={toggleFeatured} /> Featured</label>
     </div>
@@ -74,21 +74,21 @@ export default function PollPage({ pollData, user, creator, voteData }) {
   const [poll, setPoll] = useState(pollData)
 
   const deletePoll = async () => {
-    if(!poll) return
+    if (!poll) return
     Swal.fire({
       title: "Are you sure you want to delete this?",
       showDenyButton: true,
       confirmButtonText: "Yes",
       confirmButtonColor: 'green'
     }).then(async (result) => {
-      if(result.isConfirmed) {
+      if (result.isConfirmed) {
         const data = await fetch(`/api/poll/delete?id=${poll._id}`, {
           method: "DELETE"
         })
-        .then(res => res.json())
-        if(data.success) {
+          .then(res => res.json())
+        if (data.success) {
           setDeleted(true)
-        }else {
+        } else {
           Swal.fire("Error:", data.error)
         }
       }
@@ -122,7 +122,7 @@ export default function PollPage({ pollData, user, creator, voteData }) {
       })
   }
 
-  if(deleted) {
+  if (deleted) {
     return (
       <div className='container mx-auto text-center text-xl pt-4'>
         You just deleted a poll :O
@@ -188,7 +188,7 @@ export default function PollPage({ pollData, user, creator, voteData }) {
         <Link href='/browse' >
           <span className='text-blue-500 cursor-pointer mt-5 flex items-center gap-2' ><ChevronDoubleLeftIcon className='w-5 h-5 text-blue-500' />browse</span>
         </Link>
-        
+
         <h1 className='text-2xl font-bold mt-5'>{poll.title}</h1>
         <div className='flex items-center gap-2 mb-10 mt-5'>
           <Link href={`/profile/${creator.username}`}>
@@ -205,7 +205,7 @@ export default function PollPage({ pollData, user, creator, voteData }) {
           {
             user.replitId === poll.createdBy &&
             <button
-              className='px-3 py-2 bg-red-500 text-white cursor-pointer rounded-sm text-sm font-thin'  
+              className='px-3 py-2 bg-red-500 text-white cursor-pointer rounded-sm text-sm font-thin'
               onClick={deletePoll}
             >Delete Poll</button>
           }
@@ -216,7 +216,7 @@ export default function PollPage({ pollData, user, creator, voteData }) {
           </div>
           {votesSection}
         </div>
-        { user.role === "ADMIN" && <AdminArea poll={poll} deletePoll={deletePoll} />}
+        {user.role === "ADMIN" && <AdminArea poll={poll} deletePoll={deletePoll} />}
       </div>
     </>
   )
@@ -224,7 +224,7 @@ export default function PollPage({ pollData, user, creator, voteData }) {
 
 export async function getServerSideProps({ req, res, params }) {
   const user = await auth(req, res)
-  
+
 
   try {
     const poll = await Poll.findById(params.id)
@@ -242,7 +242,7 @@ export async function getServerSideProps({ req, res, params }) {
         id: Number(poll.createdBy)
       }
     })
-    
+
     const vote = poll.votes.find(v => v.uid === user.replitId)
 
     return {
@@ -256,11 +256,11 @@ export async function getServerSideProps({ req, res, params }) {
         }
       }
     }
-  }catch (e) {
+  } catch (e) {
     return {
       props: { user, poll: null, creator: null }
     }
   }
 
-  
+
 }
