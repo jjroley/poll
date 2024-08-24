@@ -75,7 +75,7 @@ export default function Browse() {
       }
     })
 
-  }, [filters])
+  }, [filters, getPolls])
 
   const filter = (data) => {
     if ('keyword' in data) {

@@ -1,7 +1,7 @@
 import useUser from '../../lib/useUser'
 import { useRouter } from 'next/router'
 import Loader from '../../components/Loader'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import VoteCard from '../../components/VoteCard'
 import Head from 'next/head'
 
@@ -13,7 +13,7 @@ export default function Profile() {
   const { username } = router.query
   const { loading } = useUser()
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     const userData = await fetch(`/api/user/?username=${username}`)
       .then(res => res.json())
 
@@ -26,12 +26,12 @@ export default function Profile() {
       .then(res => res.json())
 
     setUserPolls(pollData)
-  }
+  }, [username])
 
   useEffect(() => {
     if (!username) return
     loadData()
-  }, [username])
+  }, [username, loadData])
 
   if (loading) {
     return <Loader />

@@ -1,6 +1,6 @@
 
 hidden = [".config"]
-run = "npm run build && npm run start"
+run = "npm run dev"
 
 [[hints]]
 regex = "Error \\[ERR_REQUIRE_ESM\\]"
@@ -75,3 +75,8 @@ pattern = "**/{*.js,*.jsx,*.ts,*.tsx}"
 
 [languages.javascript.languageServer]
 start = "typescript-language-server --stdio"
+
+[deployment]
+build = ["sh", "-c", "npm run build"]
+deploymentTarget = "cloudrun"
+run = ["sh", "-c", "npm run start"]

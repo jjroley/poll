@@ -46,7 +46,7 @@ export default function ChartComponent({ data }) {
         }
       })
     })
-  }, [])
+  }, [ chart, data ])
 
   useEffect(() => {
     if(!chart || !data) return
