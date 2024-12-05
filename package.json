@@ -16,7 +16,7 @@
     "bad-words": "^3.0.4",
     "chart.js": "^3.9.1",
     "mongodb": "^4.9.0",
-    "mongoose": "^6.11.3",
+    "mongoose": "^6.13.5",
     "next": "12.2.5",
     "next-connect": "^0.13.0",
     "nextjs-progressbar": "0.0.14",
